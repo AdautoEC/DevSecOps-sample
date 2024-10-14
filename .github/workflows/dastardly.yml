@@ -7,6 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Run Dastardly Action Step
+      continue-on-error: true
       uses: PortSwigger/dastardly-github-action@main
       with:
         target-url: 'https://ginandjuice.shop'
+
+    - name: Upload Dastardly XML Report Step
+      uses: actions/upload-artifact@v3
+      with:
+        name: dastardly-report.xml
+        path: dastardly-report.xml
