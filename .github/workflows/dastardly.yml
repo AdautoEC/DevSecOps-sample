@@ -1,4 +1,4 @@
-name: Dastardly Action
+name: DevSecOps Pipeline - only dastardly
 
 on: workflow_dispatch
 
