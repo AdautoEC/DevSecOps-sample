@@ -1,4 +1,4 @@
-name: DevSecOps Pipeline
+name: DevSecOps Pipeline - only zap
 on: push 
 jobs: 
   zap_scan:
