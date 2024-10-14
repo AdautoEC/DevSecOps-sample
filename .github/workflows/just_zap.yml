@@ -1,0 +1,12 @@
+name: DevSecOps Pipeline
+on: push 
+jobs: 
+  zap_scan:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    name: zap
+    steps:
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.13.0
+        with:
+          target: 'http://juice-shop.herokuapp.com/'
