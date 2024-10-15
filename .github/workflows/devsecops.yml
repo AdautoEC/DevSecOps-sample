@@ -3,8 +3,9 @@ on:
   - pull_request
   - workflow_dispatch
 jobs:
-  SAST-sonarcloud:
+  sonarcloud:
     runs-on: ubuntu-latest
+    name: SAST - Sonar cloud
     steps:
     - uses: actions/checkout@v2
       with:
@@ -15,19 +16,25 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  PRE_BUILD-vulnerable_npm_install:
+  vulnerable_npm_install:
     runs-on: ubuntu-latest
-    needs: SAST-sonarcloud
+    needs: sonarcloud
+    name: PRE BUILD - fake vulnerable npm install
     steps:
       - uses: actions/checkout@master
       - name: Install vulnerable dependencies
         continue-on-error: true
         run: npm install
 
-  SCA-snyk:
+  snyk:
     runs-on: ubuntu-latest
-    needs: PRE_BUILD-vulnerable_npm_install
+    needs: vulnerable_npm_install
+    name: SCA - Snyk scan
     steps:
+      - uses: actions/checkout@master
+      - name: Install vulnerable dependencies
+        continue-on-error: true
+        run: npm install
       - name: Run Snyk to check for vulnerabilities
         continue-on-error: true
         uses: snyk/actions/node@master
@@ -36,29 +43,31 @@ jobs:
         with:
           command: monitor
 
-  BUILD-vulnerable_build_app:
+  vulnerable_build_app:
     runs-on: ubuntu-latest
-    needs: SCA-snyk
+    needs: snyk
+    name: BUILD - fake vulnerable deploy
     steps:
       - uses: actions/checkout@master
       - name: Install vulnerable dependencies
         continue-on-error: true
         run: echo "Build vulnerable app"
 
-  DEPLOY-vulnerable_deploy_app:
+  vulnerable_deploy_app:
     runs-on: ubuntu-latest
-    needs: BUILD-vulnerable_build_app
+    needs: vulnerable_build_app
+    name: DEPLOY - fake vulnerable deploy
     steps:
       - uses: actions/checkout@master
       - name: Install vulnerable dependencies
         continue-on-error: true
         run: echo "Build vulnerable app"
 
-  DATS-zap_scan:
+  zap_scan:
     runs-on: ubuntu-latest
-    needs: DEPLOY-vulnerable_deploy_app
+    needs: vulnerable_deploy_app
     permissions: write-all
-    name: zap
+    name: DAST - Zap Scan
     steps:
       - name: ZAP Scan
         uses: zaproxy/action-baseline@v0.13.0
@@ -67,8 +76,9 @@ jobs:
 
   DATS-dastardly:
     runs-on: ubuntu-latest
-    needs: DEPLOY-vulnerable_deploy_app
+    needs: vulnerable_deploy_app
     permissions: write-all
+    name: DAST - Dastardly
     steps:
       - name: Run Dastardly Action Step
         continue-on-error: true
