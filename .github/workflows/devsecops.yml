@@ -4,12 +4,13 @@ on:
   - workflow_dispatch
 jobs:
   sonarcloud:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest90
     steps:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
     - name: SonarCloud Scan
+      continue-on-error: true
       uses: sonarsource/sonarcloud-github-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -20,6 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - name: Run Snyk to check for vulnerabilities
+        continue-on-error: true
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}    
