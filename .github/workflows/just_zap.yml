@@ -1,5 +1,7 @@
 name: DevSecOps Pipeline - only zap
-on: push 
+on:
+  - pull_request
+  - workflow_dispatch
 jobs: 
   zap_scan:
     runs-on: ubuntu-latest
