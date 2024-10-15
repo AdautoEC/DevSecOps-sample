@@ -10,7 +10,6 @@ jobs:
       with:
         fetch-depth: 0
     - name: SonarCloud Scan
-      continue-on-error: true
       uses: sonarsource/sonarcloud-github-action@master
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -20,8 +19,10 @@ jobs:
     needs: sonarcloud
     steps:
       - uses: actions/checkout@master
+      - name: Install vulnerable dependencies
+        run: npm install
+
       - name: Run Snyk to check for vulnerabilities
-        continue-on-error: true
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}    
