@@ -16,9 +16,22 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+  semgrep:
+    name: SAST - Semgrep
+    runs-on: ubuntu-latest
+    env:
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep ci
+
   vulnerable_npm_install:
     runs-on: ubuntu-latest
-    needs: sonarcloud
+    needs:
+      - sonarcloud
+      - semgrep
     name: PRE BUILD - fake vulnerable npm install
     steps:
       - uses: actions/checkout@master
