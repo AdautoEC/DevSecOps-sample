@@ -116,7 +116,7 @@ jobs:
         with:
           target: 'http://juice-shop.herokuapp.com/'
 
-  DATS-dastardly:
+  dastardly:
     runs-on: ubuntu-latest
     needs: vulnerable_deploy_app
     permissions: write-all
