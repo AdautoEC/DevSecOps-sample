@@ -3,7 +3,7 @@ on:
   - pull_request
   - workflow_dispatch
 jobs:
-  sonarcloud:
+  SAST-sonarcloud:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -15,14 +15,19 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  snyk:
+  PRE_BUILD-vulnerable_npm_install:
     runs-on: ubuntu-latest
-    needs: sonarcloud
+    needs: SAST-sonarcloud
     steps:
       - uses: actions/checkout@master
       - name: Install vulnerable dependencies
+        continue-on-error: true
         run: npm install
 
+  SCA-snyk:
+    runs-on: ubuntu-latest
+    needs: PRE_BUILD-vulnerable_npm_install
+    steps:
       - name: Run Snyk to check for vulnerabilities
         continue-on-error: true
         uses: snyk/actions/node@master
@@ -31,9 +36,27 @@ jobs:
         with:
           command: monitor
 
-  zap_scan:
+  BUILD-vulnerable_build_app:
     runs-on: ubuntu-latest
-    needs: snyk
+    needs: SCA-snyk
+    steps:
+      - uses: actions/checkout@master
+      - name: Install vulnerable dependencies
+        continue-on-error: true
+        run: echo "Build vulnerable app"
+
+  DEPLOY-vulnerable_deploy_app:
+    runs-on: ubuntu-latest
+    needs: BUILD-vulnerable_build_app
+    steps:
+      - uses: actions/checkout@master
+      - name: Install vulnerable dependencies
+        continue-on-error: true
+        run: echo "Build vulnerable app"
+
+  DATS-zap_scan:
+    runs-on: ubuntu-latest
+    needs: DEPLOY-vulnerable_deploy_app
     permissions: write-all
     name: zap
     steps:
@@ -41,3 +64,20 @@ jobs:
         uses: zaproxy/action-baseline@v0.13.0
         with:
           target: 'http://juice-shop.herokuapp.com/'
+
+  DATS-dastardly:
+    runs-on: ubuntu-latest
+    needs: DEPLOY-vulnerable_deploy_app
+    permissions: write-all
+    steps:
+      - name: Run Dastardly Action Step
+        continue-on-error: true
+        uses: PortSwigger/dastardly-github-action@main
+        with:
+          target-url: 'http://juice-shop.herokuapp.com/'
+
+      - name: Upload Dastardly XML Report Step
+        uses: actions/upload-artifact@v3
+        with:
+          name: dastardly-report.xml
+          path: dastardly-report.xml
