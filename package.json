@@ -10,7 +10,7 @@
     "lodash": "4.17.11",
     "express": "4.16.1",
     "jquery": "3.4.0",
-    "marked": "0.3.6"
+    "marked": "0.8.2"
   },
   "devDependencies": {
     "mocha": "2.2.5"
